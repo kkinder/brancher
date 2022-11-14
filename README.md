@@ -34,49 +34,49 @@ Add `-h` to any command for usage details.
 ### Initialization
 Let's start with an example of an empty repo.
 
-![First Commit](docs/ss-01-first-commit.png)
+![First Commit](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-01-first-commit.png)
 
 Next, initialize Brancher. Brancher will store your branching model in your repository's local configuration.
 
-![Brancher init](docs/ss-02-init.png)
+![Brancher init](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-02-init.png)
 
 ### Advancing commits
 
 Now let's start some development work.
 
-![Development work](docs/ss-03-dev-work.png)
+![Development work](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-03-dev-work.png)
 
 That looks good, so we'll advance that commit to `staging`, the next branch after `develop`.
 
-![Advancing commits](docs/ss-04-forward.png)
+![Advancing commits](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-04-forward.png)
 
 While `staging` is having some Q/A work done, we'll continue development in `develop`:
 
-![More development work](docs/ss-05-more-dev-work.png)
+![More development work](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-05-more-dev-work.png)
 
 ### Commit overview
 
 With pending commits in `develop` and `staging`, let's get an overview of what commits exist where.
 
-![Overview](docs/ss-06-overview.png)
+![Overview](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-06-overview.png)
 
 ### Backfilling hotfixes
 
 With development work ongoing and Q/A happening on `staging`, let's make an urgent bugfix to production. As you can see, once that commit has been made, it only exists on the `master` branch, not other branches.
 
-![Hotfix to production](docs/ss-07-hotfix.png)
+![Hotfix to production](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-07-hotfix.png)
 
 We want to bring that hotfix back into `develop`. After checking out `develop`, we'll apply the hotfix to develop too:
 
-![Backfix to staging](docs/ss-08-backfix.png)
+![Backfix to staging](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-08-backfix.png)
 
 An overview confirms that the backfilled changes have been applied to `develop`, but not `beta` or `staging`:
 
-![Overview hotfix](docs/ss-09-overview-hotfix.png)
+![Overview hotfix](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-09-overview-hotfix.png)
 
 We can remedy this by applying the hotfix to those environments, also:
 
-![Backfill beta](docs/ss-10-backfix-beta.png)
+![Backfill beta](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-10-backfix-beta.png)
 
-![Backfill stagign](docs/ss-11-backfix-staging.png)
+![Backfill stagign](https://raw.githubusercontent.com/kkinder/brancher/master/docs/ss-11-backfix-staging.png)
 
