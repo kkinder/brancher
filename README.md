@@ -25,6 +25,7 @@ Commands:
 - overview (o): Prints an overview of branches with outstanding commits
 - forward (f): Fast forwards commits into branch
 - backfix (b): Applies changes on more advanced branches to current one
+- compare (c): Shows commits in one branch but not another
 - init: Initialize repo
 
 Add `-h` to any command for usage details.
