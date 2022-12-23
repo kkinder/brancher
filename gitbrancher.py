@@ -142,7 +142,7 @@ class ForwardCommand(Command):
     HELP = 'Fast forwards commits into branch'
 
     def add_arguments(self, parser):
-        parser.add_argument('dest_branch', default=None)
+        parser.add_argument('dest_branch', default=None, nargs='?', help='Branch to fast forward into')
 
     def run(self, args):
         dest_branch = args.dest_branch
