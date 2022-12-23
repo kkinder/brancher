@@ -92,6 +92,7 @@ class OverviewCommand(Command):
     def add_arguments(self, parser):
         parser.add_argument('-t', '--truncate', type=int, default=60, dest='truncate',
                             help='Truncate commit descriptions at this length')
+        parser.add_argument('--no-emoji', default=True, dest='emoji', action='store_false')
         parser.add_argument('--table-format', type=str, default='fancy_grid', dest='tablefmt',
                             choices=tabulate_formats,
                             help='Table format to use. See tabulate docs for options')
@@ -109,11 +110,11 @@ class OverviewCommand(Command):
             found_earlier = False
             for branch in branch_names:
                 if commit in commits_by_branch[branch]:
-                    row.append('✅')
+                    row.append('✅' if args.emoji else 'Y')
                 else:
                     # Commit doesn't exist. If it exists in a more advanced branch, show a red x
                     if any([commit in commits_by_branch[b] for b in branch_names[branch_names.index(branch)+1:]]):
-                        row.append('❌')
+                        row.append('❌' if args.emoji else 'X')
                     else:
                         row.append(' ')
             table.append(row)
