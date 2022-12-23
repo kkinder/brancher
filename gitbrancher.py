@@ -3,7 +3,7 @@ import argparse
 import subprocess
 import sys
 from collections import OrderedDict
-from tabulate import tabulate
+from tabulate import tabulate, tabulate_formats
 
 branch_names = None
 prod_branch = None
@@ -92,6 +92,9 @@ class OverviewCommand(Command):
     def add_arguments(self, parser):
         parser.add_argument('-t', '--truncate', type=int, default=60, dest='truncate',
                             help='Truncate commit descriptions at this length')
+        parser.add_argument('--table-format', type=str, default='fancy_grid', dest='tablefmt',
+                            choices=tabulate_formats,
+                            help='Table format to use. See tabulate docs for options')
 
     def run(self, args):
         truncate = args.truncate
@@ -115,7 +118,7 @@ class OverviewCommand(Command):
                         row.append(' ')
             table.append(row)
 
-        print(tabulate(table, headers=['Commit'] + branch_names, tablefmt="fancy_grid"))
+        print(tabulate(table, headers=['Commit'] + branch_names, tablefmt=args.tablefmt))
 
 
 class CompareCommand(Command):
