@@ -117,17 +117,38 @@ class OverviewCommand(Command):
 
         print(tabulate(table, headers=['Commit'] + branch_names, tablefmt="fancy_grid"))
 
+
+class CompareCommand(Command):
+    COMMAND = 'compare'
+    COMMAND_ALIASES = ['c']
+    HELP = 'Compare commits two branches'
+
+    def add_arguments(self, parser):
+        parser.add_argument('from_branch', help='Branch to compare from')
+        parser.add_argument('to_branch', help='Branch to compare to')
+
+    def run(self, args):
+        load_config()
+        commits = get_pending_commits(args.from_branch, args.to_branch)
+        show_branch_diff(commits, args.from_branch, args.to_branch)
+
+
 class ForwardCommand(Command):
     COMMAND = 'forward'
     COMMAND_ALIASES = ['f']
     HELP = 'Fast forwards commits into branch'
 
     def add_arguments(self, parser):
-        parser.add_argument('dest_branch')
+        parser.add_argument('dest_branch', default=None)
 
     def run(self, args):
         dest_branch = args.dest_branch
         load_config()
+
+        if not dest_branch:
+            current_branch = subprocess.check_output(['git', 'symbolic-ref', '--short', 'HEAD']).decode('utf8').strip()
+            branch_position = branch_names.index(current_branch)
+            dest_branch = branch_names[branch_position + 1]
 
         # Validate input
         if dest_branch not in branch_names:
