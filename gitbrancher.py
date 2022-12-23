@@ -107,7 +107,6 @@ class OverviewCommand(Command):
         for commit in all_commits:
             desc = commit[0:truncate]
             row = [f'{desc}']
-            found_earlier = False
             for branch in branch_names:
                 if commit in commits_by_branch[branch]:
                     row.append('✅' if args.emoji else 'Y')
