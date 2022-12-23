@@ -8,7 +8,12 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
+textual = "^0.8.0"
+tabulate = {extras = ["widechars"], version = "^0.9.0"}
 
+
+[tool.poetry.group.dev.dependencies]
+textual = {extras = ["dev"], version = "^0.8.0"}
 
 [build-system]
 requires = ["poetry-core"]
