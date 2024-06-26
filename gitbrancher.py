@@ -3,7 +3,9 @@ import argparse
 import subprocess
 import sys
 from collections import OrderedDict
-from tabulate import tabulate, tabulate_formats
+
+from rich.console import Console
+from rich.table import Table
 
 branch_names = None
 prod_branch = None
@@ -93,9 +95,6 @@ class OverviewCommand(Command):
         parser.add_argument('-t', '--truncate', type=int, default=60, dest='truncate',
                             help='Truncate commit descriptions at this length')
         parser.add_argument('--no-emoji', default=True, dest='emoji', action='store_false')
-        parser.add_argument('--table-format', type=str, default='fancy_grid', dest='tablefmt',
-                            choices=tabulate_formats,
-                            help='Table format to use. See tabulate docs for options')
 
     def run(self, args):
         truncate = args.truncate
@@ -103,7 +102,8 @@ class OverviewCommand(Command):
         load_config()
 
         commits_by_branch, all_commits = get_all_commits()
-        table = []
+        table = Table(*['Commit'] + branch_names)
+
         for commit in all_commits:
             desc = commit[0:truncate]
             row = [f'{desc}']
@@ -116,9 +116,9 @@ class OverviewCommand(Command):
                         row.append('❌' if args.emoji else 'X')
                     else:
                         row.append(' ')
-            table.append(row)
-
-        print(tabulate(table, headers=['Commit'] + branch_names, tablefmt=args.tablefmt))
+            table.add_row(*row)
+        console = Console()
+        console.print(table)
 
 
 class CompareCommand(Command):
