@@ -6,6 +6,7 @@ from collections import OrderedDict
 
 from rich.console import Console
 from rich.table import Table
+from rich.prompt import Prompt
 
 branch_names = None
 prod_branch = None
@@ -13,25 +14,35 @@ prod_branch = None
 GIT_CONFIG_PROD_BRANCH_NAME = 'brancher.prod-branch'
 GIT_CONFIG_BRANCH_NAMES = 'brancher.branch-names'
 
+
 def load_config():
     global branch_names
     global prod_branch
 
-    branch_names = subprocess.check_output(['git', 'config', '--local', '--get', GIT_CONFIG_BRANCH_NAMES]).decode('utf8').split(',')
-    prod_branch = subprocess.check_output(['git', 'config', '--local', '--get', GIT_CONFIG_PROD_BRANCH_NAME]).decode('utf8').strip()
+    try:
+        branch_names = subprocess.check_output(['git', 'config', '--local', '--get', GIT_CONFIG_BRANCH_NAMES],
+                                               stderr=subprocess.PIPE).decode('utf8').split(',')
+        prod_branch = subprocess.check_output(['git', 'config', '--local', '--get', GIT_CONFIG_PROD_BRANCH_NAME],
+                                              stderr=subprocess.PIPE).decode('utf8').strip()
+    except subprocess.CalledProcessError as e:
+        error = e.stderr.decode('utf8').strip()
+        if "can only be used inside a git repository" in error:
+            print('Brancher must be run inside a git repository', file=sys.stderr)
+        elif error == '':
+            print('Brancher is not configured on this repo. Run brancher init', file=sys.stderr)
+        else:
+            print('Error loading config:', error, file=sys.stderr)
+        sys.exit(1)
 
     branch_names = [b.strip() for b in branch_names]
 
     if not (branch_names and prod_branch):
         print('Brancher is not configured on this repo. Run brancher init', file=sys.stderr)
 
+
 def confirm(prompt='Confirm'):
-    while 1:
-        confirm = input(f'{prompt} (Y/N): ').lower().strip()
-        if confirm == 'y':
-            return True
-        elif confirm == 'n':
-            return False
+    return Prompt.ask(prompt, choices=['y', 'n']) == 'y'
+
 
 def get_pending_commits(branch, comparison_branch=prod_branch, abbrev=6):
     if abbrev:
@@ -43,6 +54,7 @@ def get_pending_commits(branch, comparison_branch=prod_branch, abbrev=6):
     if '' in output:
         output.remove('')
     return output
+
 
 def get_all_commits(abbrev=6):
     all_commits = []
@@ -56,6 +68,7 @@ def get_all_commits(abbrev=6):
                 if commit not in all_commits:
                     all_commits.append(commit)
     return commits_by_branch, all_commits
+
 
 def show_branch_diff(commits, from_branch, dest_branch):
     visual = f'{from_branch} ------------> {dest_branch}'
@@ -86,6 +99,7 @@ class Command:
         print(message, file=sys.stderr)
         sys.exit(1)
 
+
 class OverviewCommand(Command):
     COMMAND = 'overview'
     COMMAND_ALIASES = ['o']
@@ -102,7 +116,7 @@ class OverviewCommand(Command):
         load_config()
 
         commits_by_branch, all_commits = get_all_commits()
-        table = Table(*['Commit'] + branch_names)
+        table = Table(*['Commit'] + branch_names, show_lines=True)
 
         for commit in all_commits:
             desc = commit[0:truncate]
@@ -112,7 +126,7 @@ class OverviewCommand(Command):
                     row.append('✅' if args.emoji else 'Y')
                 else:
                     # Commit doesn't exist. If it exists in a more advanced branch, show a red x
-                    if any([commit in commits_by_branch[b] for b in branch_names[branch_names.index(branch)+1:]]):
+                    if any([commit in commits_by_branch[b] for b in branch_names[branch_names.index(branch) + 1:]]):
                         row.append('❌' if args.emoji else 'X')
                     else:
                         row.append(' ')
@@ -172,6 +186,7 @@ class ForwardCommand(Command):
         if confirm():
             subprocess.check_call(merge_command, shell=True)
 
+
 class Backfix(Command):
     COMMAND = 'backfix'
     COMMAND_ALIASES = ['b']
@@ -206,6 +221,7 @@ class Backfix(Command):
                     subprocess.check_call(merge_command, shell=True)
                     print()
 
+
 class InitCommand(Command):
     COMMAND = 'init'
     HELP = 'Initialize repo'
@@ -233,8 +249,10 @@ class InitCommand(Command):
 
         print('Configured')
 
+
 def main():
     parser = argparse.ArgumentParser(description="Utility for advancing git branches")
+    parser.add_argument("--version", action="store_true", help="Print version and exit")
     subparsers = parser.add_subparsers(dest="command")
 
     commands = {}
@@ -245,11 +263,17 @@ def main():
             commands[alias] = command_instance
 
     args = parser.parse_args()
-    if args.command:
+    if args.version:
+        import importlib.metadata
+
+        print(f"Brancher {importlib.metadata.version('gitbrancher')}")
+
+    elif args.command:
         command_instance = commands[args.command]
         command_instance.run(args)
     else:
         parser.print_help()
+
 
 if __name__ == '__main__':
     main()
